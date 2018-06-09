@@ -100,7 +100,7 @@ now we have cluster_indices (lists of listes of white points in the cloud then w
 6. Classification: 
 loop through each detected cluster one at a time and compute the color and normal histograms usuing HSV instead of RGB and make a prediction
 
-	```python
+```python
 	detected_objects_labels = []
 		detected_objects = []
 	        # Grab the points for the cluster
@@ -131,7 +131,7 @@ loop through each detected cluster one at a time and compute the color and norma
 			do.label = label
 			do.cloud = ros_cluster
 			detected_objects.append(do)
-	```
+```
 
 
 
@@ -182,3 +182,23 @@ for counter in range(0,len(object_list_param)):
 			rospy.wait_for_service('pick_place_routine')
 ```
 
+### Train SVM :
+using linear Kernel and HSV instead of RGB to compute Color Histograms i could train the SVM with total 450 Features and get the below result : s
+![1](imgs/1.png) ![2](imgs/2.png)
+
+### Object recognition :
+after loading the saved traind Model : [model.sav](model.sav) 
+the result was in the first scene :   
+3 / 3   
+
+![world1](imgs/world1.png)  
+
+in the second :   
+5/5  
+
+![world2](imgs/world2.png)  
+
+in the third however :   
+6/8  
+
+![world3](imgs/world3.png)
