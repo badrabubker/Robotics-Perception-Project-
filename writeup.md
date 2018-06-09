@@ -78,60 +78,59 @@ first of all we make a white mask of our cloud to make it easier for the search 
 		ec.set_SearchMethod(tree)
 		# Extract indices for each of the discovered clusters
 		cluster_indices = ec.Extract()
-	```
+	```  
 now we have cluster_indices (lists of listes of white points in the cloud then we loop over them all and we add the corresponding colored points to list 
 
 	```python
-	cluster_color = get_color_list(len(cluster_indices))
-		color_cluster_point_list = []
-	
-		for j, indices in enumerate(cluster_indices):
-		    for i, indice in enumerate(indices):
-			color_cluster_point_list.append([white_cloud[indice][0],
-			                                white_cloud[indice][1],
-			                                white_cloud[indice][2],
-			                                 rgb_to_float(cluster_color[j])])
-	
-		#Create new cloud containing all clusters, each with unique color
-		cluster_cloud = pcl.PointCloud_PointXYZRGB()
-		cluster_cloud.from_list(color_cluster_point_list)
-	```
-
+			cluster_color = get_color_list(len(cluster_indices))
+				color_cluster_point_list = []
+			
+				for j, indices in enumerate(cluster_indices):
+				    for i, indice in enumerate(indices):
+					color_cluster_point_list.append([white_cloud[indice][0],
+					                                white_cloud[indice][1],
+					                                white_cloud[indice][2],
+					                                 rgb_to_float(cluster_color[j])])
+			
+				#Create new cloud containing all clusters, each with unique color
+				cluster_cloud = pcl.PointCloud_PointXYZRGB()
+				cluster_cloud.from_list(color_cluster_point_list)
+	```  
 6. Classification: 
 loop through each detected cluster one at a time and compute the color and normal histograms usuing HSV instead of RGB and make a prediction
 
-```python
-	detected_objects_labels = []
-		detected_objects = []
-	        # Grab the points for the cluster
-		for index, pts_list in enumerate(cluster_indices):
-			# Grab the points for the cluster from the extracted outliers (cloud_objects)
-			pcl_cluster = extracted_outliers.extract(pts_list)
-			
-			#convert the cluster from pcl to ROS using helper function
-			ros_cluster = pcl_to_ros(pcl_cluster)
-			# Extract histogram features
-			chists = compute_color_histograms(ros_cluster , using_hsv=True)
-			normals = get_normals(ros_cluster)
-	          	nhists = compute_normal_histograms(normals)
-	            	feature = np.concatenate((chists, nhists))
-			# Make the prediction, retrieve the label for the result
-			# and add it to detected_objects_labels list
-			prediction = clf.predict(scaler.transform(feature.reshape(1,-1)))
-			label = encoder.inverse_transform(prediction)[0]
-			detected_objects_labels.append(label)
-	
-			# Publish a label into RViz
-			label_pos = list(white_cloud[pts_list[0]])
-			label_pos[2] += .4
-			object_markers_pub.publish(make_label(label,label_pos, index))
-	
-			# Add the detected object to the list of detected objects.
-			do = DetectedObject()
-			do.label = label
-			do.cloud = ros_cluster
-			detected_objects.append(do)
-```
+	```python
+		detected_objects_labels = []
+			detected_objects = []
+		        # Grab the points for the cluster
+			for index, pts_list in enumerate(cluster_indices):
+				# Grab the points for the cluster from the extracted outliers (cloud_objects)
+				pcl_cluster = extracted_outliers.extract(pts_list)
+				
+				#convert the cluster from pcl to ROS using helper function
+				ros_cluster = pcl_to_ros(pcl_cluster)
+				# Extract histogram features
+				chists = compute_color_histograms(ros_cluster , using_hsv=True)
+				normals = get_normals(ros_cluster)
+		          	nhists = compute_normal_histograms(normals)
+		            	feature = np.concatenate((chists, nhists))
+				# Make the prediction, retrieve the label for the result
+				# and add it to detected_objects_labels list
+				prediction = clf.predict(scaler.transform(feature.reshape(1,-1)))
+				label = encoder.inverse_transform(prediction)[0]
+				detected_objects_labels.append(label)
+		
+				# Publish a label into RViz
+				label_pos = list(white_cloud[pts_list[0]])
+				label_pos[2] += .4
+				object_markers_pub.publish(make_label(label,label_pos, index))
+		
+				# Add the detected object to the list of detected objects.
+				do = DetectedObject()
+				do.label = label
+				do.cloud = ros_cluster
+				detected_objects.append(do)
+	```
 
 
 
@@ -183,7 +182,7 @@ for counter in range(0,len(object_list_param)):
 ```
 
 ### Train SVM :
-using linear Kernel and HSV instead of RGB to compute Color Histograms i could train the SVM with total 450 Features and get the below result : s
+using linear Kernel and HSV instead of RGB to compute Color Histograms i could train the SVM with total 450 Features and get the below result : 
 ![1](imgs/1.png) ![2](imgs/2.png)
 
 ### Object recognition :
